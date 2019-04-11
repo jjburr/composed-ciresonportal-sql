@@ -49,7 +49,7 @@ OR
 8. Build OR Pull (Or let docker-compose automatically pull image when compose up is run on step 11) from deveops0101 repo the customized MS container SQL Image (This has full text search enabled and adds GMSA Accounts on container Startup)
 - docker pull devops0101/mssql-server-with-custom-gmsa-sysadmin:2017 
 OR   
-- docker build -t nameofyorepo/mssql-server-with-custom-gmsa-sysadmin:2017 .
+- docker build -t mssql-server-with-custom-gmsa-sysadmin:2017 .
 9. Create a tranistive docker network (OPTIONAL -by default you have a nat network - if using nat you need to declare ports you want want to expose in the compose file (As you are natting ports to the host IP address), remove the ipv4 static address and change external network to nat at the end of compose file)
 - See https://www.ntweekly.com/2017/03/30/how-to-create-a-transparent-network-with-windows-containers/ (I used the non-DHCP option)
 10. Review and update .env file with your environment information, setting the desired version you want on each evironment. As this is using SQL 2017, versions v9.0.4+ must be used. Authentication in Server 2016 windows containers the hostname of the container must match the GMSA account name (This is not a requirement for Server 2019 containers)
