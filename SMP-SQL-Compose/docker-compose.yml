@@ -1,0 +1,107 @@
+version: '3.6'
+
+services: 
+
+  sql:
+    image: devops0101/mssql-server-with-custom-gmsa-sysadmin:2017
+    #IF Using Server 2019 the hostname doesnt have to match the credspec name
+    hostname: ${sqlcredspecfile}
+    security_opt:
+      - credentialspec=file://${sqlcredspecfile}.json
+    restart: always
+    volumes: 
+      - ${volumepathforsql}
+    environment:
+      - sa_password=${sqlsapassword}
+      - ACCEPT_EULA=Y
+      - gmsa_username=${gMSAuserNames}
+      # You could attach an existing DB here by using the attach-dbs variable to point at JSON string, 
+      ## see https://github.com/Microsoft/mssql-docker/tree/master/windows/mssql-server-windows-developer
+    networks:
+      default:
+        ipv4_address: ${SQLcontainerip}  
+    dns: 
+      - ${dnsserver}
+    dns_search:
+      - ${dnssuffix}     
+
+  portal_dev:
+    depends_on:
+      - sql
+    build: 
+      context: .
+      args: 
+        smp_zip_uri: ${smp_zip_uri}/${devSMPversion}.2016.zip
+        Hostname: ${devcredspecfile}
+    image: smp-composed-dev:${devSMPversion}
+    environment:
+      - ManagementDBName=${devManagementDBName}
+      - SQLServer=${sqlcredspecfile}      
+      - ApplicationTitle=Portal v ${devSMPversion} ENV:DEV
+      - AnalyticDBName=${devAnalyticDBName}
+      - ManagementServer=${ManagementServer}
+      - ManagementServerBinaryPath=${ManagementServerBinaryPath}
+      - AnalystsADGroup=${AnalystsADGroup}
+      - AssetManagementADGroup=${AssetManagementADGroup}
+      - KnowledgeManagerADGroup=${KnowledgeManagerADGroup}
+      - SMSQLServer=${SMSQLServer}
+      - SMTPServerName=${SMTPServerName}
+      - SMTPServerPort=${SMTPServerPort}
+      - SMTPEmailReturnAddress={SMTPEmailReturnAddress}
+    security_opt:
+      - credentialspec=file://${devcredspecfile}.json
+    hostname: ${devcredspecfile}  
+    restart: always
+    volumes: 
+      - ${devVolumepathforcustomspace}
+    networks:
+      default:
+        ipv4_address: ${devSMPcontainerip}  
+    dns: 
+    - ${dnsserver}
+    dns_search:
+    - ${dnssuffix}
+
+  portal_uat:
+    depends_on:
+      - sql
+      - portal_dev
+    build: 
+      context: .
+      args: 
+        smp_zip_uri: ${smp_zip_uri}/${uatSMPversion}.2016.zip
+        Hostname: ${uatcredspecfile}
+    image: smp-composed-uat:${uatSMPversion}
+    environment:
+      - ManagementDBName=${uatManagementDBName}
+      - SQLServer=${sqlcredspecfile}      
+      - ApplicationTitle=Portal v ${uatSMPversion} ENV:UAT
+      - AnalyticDBName=${uatAnalyticDBName}
+      - ManagementServer=${ManagementServer}
+      - ManagementServerBinaryPath=${ManagementServerBinaryPath}
+      - AnalystsADGroup=${AnalystsADGroup}
+      - AssetManagementADGroup=${AssetManagementADGroup}
+      - KnowledgeManagerADGroup=${KnowledgeManagerADGroup}
+      - SMSQLServer=${SMSQLServer}
+      - SMTPServerName=${SMTPServerName}
+      - SMTPServerPort=${SMTPServerPort}
+      - SMTPEmailReturnAddress={SMTPEmailReturnAddress}
+    security_opt:
+      - credentialspec=file://${uatcredspecfile}.json
+    hostname: ${uatcredspecfile}  
+    restart: always
+    volumes: 
+      - ${uatVolumepathforcustomspace}
+    networks:
+      default:
+        ipv4_address: ${uatSMPcontainerip}  
+    dns: 
+    - ${dnsserver}
+    dns_search:
+    - ${dnssuffix}   
+
+networks:
+     default:
+          external:
+           name: transnet
+
