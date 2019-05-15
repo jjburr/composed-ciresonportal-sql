@@ -22,8 +22,7 @@ New-ADServiceAccount-name GMSA_DOCKERUAT -DNSHostName GMSA_DOCKERUAT.EVALLAB.LOC
    ````
 4. Add each of the 3 GMSA Accounts to Docker Host
 ```
-   Add-WindowsFeature 
-   RSAT-AD-PowerShell 
+   Add-WindowsFeature RSAT-AD-PowerShell 
    Import-Module ActiveDirectory 
    Install-AdServiceAccount GMSA_DOCKER 
    Test-AdServiceAccount GMSA_DOCKER
@@ -36,10 +35,11 @@ New-ADServiceAccount-name GMSA_DOCKERUAT -DNSHostName GMSA_DOCKERUAT.EVALLAB.LOC
 - Download and Install the CredentialSpec module from https://www.powershellgallery.com/packages/CredentialSpec/1.0.0
 - Run below
 ```
+install-module credentialspec
 Import-Module CredentialSpec
 New-CredentialSpec -Name GMSA_DOCKER -AccountName GMSA_DOCKER
-New-CredentialSpec -Name GMSA_DOCKER -AccountName GMSA_DOCKERSQL
-New-CredentialSpec -Name GMSA_DOCKER -AccountName GMSA_DOCKERUAT
+New-CredentialSpec -Name GMSA_DOCKERSQL -AccountName GMSA_DOCKERSQL
+New-CredentialSpec -Name GMSA_DOCKERUAT -AccountName GMSA_DOCKERUAT
 ```     
 6. Create an AD Group for the Cred Spec Service Accounts and grant permissions for the group to be in SCSM Admins and SQL Permissions to the Service manager SQL instance
 7. Build the docker preq image for SMP or PULL from deveops0101 container repo (Or let docker-compose automatically pull image when compose up is run on step 11)
